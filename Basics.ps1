@@ -62,3 +62,6 @@ Get-Date
 
 Get-Date -Format "o"
 # => 2021-09-01T10:08:52.4983856+02:00
+
+Get-Date -Hour 0 -Minute 0 -Second 0
+# => Mittwoch, 1. September 2021 00:00:00
