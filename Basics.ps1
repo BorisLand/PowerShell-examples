@@ -55,3 +55,10 @@ catch
     Write-Host $_.Exception.InnerException.StackTrace
     Write-Host $_.Exception.InnerException.Message
 }
+
+# Date / Date Time
+Get-Date
+# => Mittwoch, 1. September 2021 10:07:07
+
+Get-Date -Format "o"
+# => 2021-09-01T10:08:52.4983856+02:00
