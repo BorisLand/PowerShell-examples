@@ -65,3 +65,7 @@ Get-Date -Format "o"
 
 Get-Date -Hour 0 -Minute 0 -Second 0
 # => Mittwoch, 1. September 2021 00:00:00
+
+# single quotes in text
+$text = "my `"test`" text"
+# => my "test" text
