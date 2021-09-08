@@ -69,3 +69,18 @@ Get-Date -Hour 0 -Minute 0 -Second 0
 # single quotes in text
 $text = "my `"test`" text"
 # => my "test" text
+
+# wait from - to (sleep)
+$now = Get-Date
+$from = Get-Date -Hour 18 -Minute 00 -Second 00
+$to = Get-Date -Hour 6 -Minute 00 -Second 00
+do
+{
+    if(($now) -le ($from) -and ($now) -gt ($to))
+    {
+        Write-Host "."
+        sleep -Seconds 600
+    }
+}
+While(($now) -le ($from) -and ($now) -gt ($to))
+
