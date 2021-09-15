@@ -1,0 +1,110 @@
+# see https://stackoverflow.com/questions/60240331/default-oobx-editform-disappeared-for-a-sharepoint-document-library
+
+$webpartTemplate = @"
+<WebPart xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/WebPart/v2">
+    <Assembly>Microsoft.SharePoint, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c</Assembly>  
+    <TypeName>Microsoft.SharePoint.WebPartPages.ListFormWebPart</TypeName>
+    <ListName xmlns="http://schemas.microsoft.com/WebPart/v2/ListForm">{{{LIST_ID}}}</ListName>
+    <ListId xmlns="http://schemas.microsoft.com/WebPart/v2/ListForm">{{LIST_ID}}</ListId>
+    <PageType xmlns="http://schemas.microsoft.com/WebPart/v2/ListForm">{{PAGE_TYPE}}</PageType>
+    <FormType xmlns="http://schemas.microsoft.com/WebPart/v2/ListForm">{{FORM_TYPE}}</FormType>
+    <ControlMode xmlns="http://schemas.microsoft.com/WebPart/v2/ListForm">{{CONTROL_MODE}}</ControlMode>
+    <ViewFlag xmlns="http://schemas.microsoft.com/WebPart/v2/ListForm">1048576</ViewFlag>
+    <ViewFlags xmlns="http://schemas.microsoft.com/WebPart/v2/ListForm">Default</ViewFlags>
+    <ListItemId xmlns="http://schemas.microsoft.com/WebPart/v2/ListForm">0</ListItemId>
+</WebPart>
+"@
+
+Function Create-DefaultListForm
+{
+    param(
+        [parameter(Mandatory=$true)]$List, 
+        [parameter(Mandatory=$true)][string]$FormUrl, 
+        [parameter(Mandatory=$true)][ValidateSet("Display", "Edit", "New")]$FormType
+    )
+
+    begin { }    
+    process
+    {
+
+     # $List = Get-PnPList 'Lieferanten'
+     # $listUrl = $List.RootFolder.ServerRelativeUrl
+     # $FormUrl = "$listUrl/DispForm.aspx"
+     # $FormType = "Display"
+
+        $webpartXml = $webpartTemplate -replace "{{LIST_ID}}", $List.Id.ToString()
+
+        switch ($FormType)
+        {
+            "Display" { 
+                $webpartXml = $webpartXml -replace "{{PAGE_TYPE}}", "PAGE_DISPLAYFORM" 
+                $webpartXml = $webpartXml -replace "{{FORM_TYPE}}", "4"  
+                $webpartXml = $webpartXml -replace "{{CONTROL_MODE}}", "Display"  
+                break;
+            }
+            "Edit" { 
+                $webpartXml = $webpartXml -replace "{{PAGE_TYPE}}", "PAGE_EDITFORM" 
+                $webpartXml = $webpartXml -replace "{{FORM_TYPE}}", "6"  
+                $webpartXml = $webpartXml -replace "{{CONTROL_MODE}}", "Edit"  
+                break;
+            }
+            "New" { 
+                $webpartXml = $webpartXml -replace "{{PAGE_TYPE}}", "PAGE_NEWFORM" 
+                $webpartXml = $webpartXml -replace "{{FORM_TYPE}}", "8"  
+                $webpartXml = $webpartXml -replace "{{CONTROL_MODE}}", "New"  
+                break;
+            }
+        }
+
+        try
+        {           
+            #Check if form page already exists
+            $listPages = Get-PnPProperty -ClientObject $List.RootFolder -Property Files
+            $formPage = $listPages | Where-Object { $_.ServerRelativeUrl.ToLower() -eq $FormUrl.ToLower() }
+
+            if ($null -eq $formPage) {
+                Write-Output "  [Creating Form Page] $FormUrl"
+
+                #Create Form
+                Remove-PnPFile -ServerRelativeUrl $FormUrl -Force
+                $formPage = $List.RootFolder.Files.AddTemplateFile($FormUrl, [Microsoft.SharePoint.Client.TemplateFileType]::FormPage)            
+            }
+            else {
+                #Form page exists, check if form is recognized by list (i.e. form page has a form webpart on it)
+                $listForms = Get-PnPProperty -ClientObject $List -Property Forms
+
+                if ($null -ne $listForms -and $listForms.Count -gt 0) {
+                    $existingForm = $list.Forms | Where-Object { $_.ServerRelativeUrl.ToLower() -eq $FormUrl.ToLower() }
+                    if ($null -ne $existingForm) {
+                        Write-Warning "  [Form Already Exists] $FormUrl"
+                        return;
+                    }                
+                }
+            }
+
+            Write-Output "  [Adding Form Webpart] $FormUrl"
+            #Get Webpart Manager for Form
+            $wpm = $formPage.GetLimitedWebPartManager([Microsoft.SharePoint.Client.WebParts.PersonalizationScope]::Shared)
+
+            #Import Webpart on page
+            $wp = $wpm.ImportWebPart($webpartXml)
+
+            #Add webpart to Form
+            $wpm.AddWebPart($wp.WebPart, "Main", 1) | Out-Null
+
+            #Execute changes
+            $List.Context.ExecuteQuery()                    
+        }
+        catch
+        {
+            Write-Error "Error creating form $FormType at $FormUrl. Error: $($_.Exception)"
+        }
+    }
+    end { }
+}
+
+Connect-PnPOnline -Url '<site Collection url'
+$list = Get-PnPList '<list name>'
+$listUrl = $list.RootFolder.ServerRelativeUrl
+
+Create-DefaultListForm -List $list -FormUrl "$listUrl/DispForm.aspx" -FormType Display
