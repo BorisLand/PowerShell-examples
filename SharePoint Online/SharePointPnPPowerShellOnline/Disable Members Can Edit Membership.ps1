@@ -1,3 +1,4 @@
+# using SharePointPnPPowerShellOnline 3.29.2101.0
 # Change AllowMembersEditMembership for one Site Collection:
 
 Connect-PnpOnline -Url "<site collection url>" -CurrentCredentials
