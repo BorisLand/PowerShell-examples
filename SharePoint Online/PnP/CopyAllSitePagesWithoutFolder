@@ -1,0 +1,13 @@
+Connect-PnPOnline -Url https://<tenant>.sharepoint.com/sites/<source site> -UseWebLogin
+
+$folderItems = Get-PnPFolderItem -FolderSiteRelativeUrl SitePages -ItemType File -Recursive
+
+foreach($item in @($folderItems))
+{
+    #$item = @($folderItems)[0]
+    if($item.ServerRelativeUrl.IndexOf('/Forms/') -eq -1)
+    {
+        Write-Host "$($item.ServerRelativeUrl)"
+        Copy-PnPFile -SourceUrl $item.ServerRelativeUrl -TargetUrl "/sites/<destination site>/SitePages" -Force -Overwrite
+    }
+}
