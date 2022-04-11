@@ -84,3 +84,10 @@ do
 }
 While(($now) -le ($from) -and ($now) -gt ($to))
 
+# => Regex
+# Match
+$value | %{$_ -match '[*+„“!\r‘‘;%#]'}
+
+# Replace
+$SP_Value = $SP_Value | %{$_ -replace '[/r]'}
+
