@@ -1,5 +1,12 @@
 # Variables
 $test = ""
+
+# Json
+$json = @{ "xxx" = @("bbb","yyy","xxx")}
+# get string
+$str = ConvertTo-Json -InputObject $json
+# get json
+$json1 = ConvertFrom-Json -InputObject $str
 ​
 # Array
 $test = @("A","B","C")
