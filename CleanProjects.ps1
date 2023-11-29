@@ -1,17 +1,20 @@
-﻿cd C:\DevGit
+﻿Write-Host "Local Git folder path (example 'c:\DevGit'):"
+$gitfolderPath = Read-Host
 
-$allDirTemp = @(Get-ChildItem -Directory -Filter 'temp' -Recurse)
-foreach($folder in @($allDirTemp))
+$gitfolder = Get-Item -Path $gitfolderPath
+if($null -eq $gitfolder)
 {
-    # $folder = @($allDirTemp)[0]
-    Write-Host "Remove $($folder.FullName)"
-    Remove-Item -Path $folder.FullName -Force -Confirm:$false -Recurse
+    Write-Host "Folder does not exists! $($gitfolderPath)" -ForegroundColor Red
+    break;
 }
 
-$allDirNodeModules = @(Get-ChildItem -Directory -Filter 'node_modules' -Recurse)
-foreach($folder in @($allDirTemp))
+if((nvm current) -ne 'v16.15.1')
 {
-    # $folder = @($allDirTemp)[0]
-    Write-Host "Remove $($folder.FullName)"
-    Remove-Item -Path $folder.FullName -Force -Confirm:$false -Recurse
+    nvm use 16.15.1
 }
+Write-Host "Install RimRaf"
+npm install --location=global rimraf
+
+cd $gitfolderPath
+
+rimraf --glob node_modules **/node_modules
