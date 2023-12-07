@@ -1,0 +1,12 @@
+[
+    {
+      "Display": "Vorhabensnummer",
+      "PropertyInternalname": "Vorhabensnummer",
+      "Source": "PropertyBag",
+      "Type": "TextBox",
+      "MultiLine": false,
+      "Rows": 1,
+      "DropDownChoices": ""
+    },
+    // ...
+  ]
