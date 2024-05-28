@@ -7,6 +7,7 @@ foreach($companyFolder in @($allDir))
 {
     # $companyFolder = @($allDir)[0]
     cd $($companyFolder.Name)
+    Write-Host $companyFolder.Name
     $allGitDirs = @(Get-ChildItem -Directory)
     foreach($allGitDir in @($allGitDirs))
     {
