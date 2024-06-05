@@ -8,9 +8,9 @@ if($null -eq $gitfolder)
     break;
 }
 
-if((nvm current) -ne 'v16.15.1')
+if((nvm current) -ne 'v18.19.1')
 {
-    nvm use 16.15.1
+    nvm use 18.19.1
 }
 Write-Host "Install RimRaf"
 npm install --location=global rimraf
