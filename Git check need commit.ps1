@@ -7,7 +7,6 @@ foreach($companyFolder in @($allDir))
 {
     # $companyFolder = @($allDir)[0]
     cd $($companyFolder.Name)
-    Write-Host $companyFolder.Name
     $allGitDirs = @(Get-ChildItem -Directory)
     foreach($allGitDir in @($allGitDirs))
     {
@@ -17,6 +16,10 @@ foreach($companyFolder in @($allDir))
         if($needCommit -ne $null)
         {
             Write-Host $allGitDir.FullName
+        }
+        else
+        {
+            Write-Host "$($allGitDir.FullName) > OK" -ForegroundColor Green
         }
         cd ..
     }
