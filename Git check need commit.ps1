@@ -6,7 +6,7 @@ $allDir = @(Get-ChildItem -Directory)
 foreach($companyFolder in @($allDir))
 {
     # $companyFolder = @($allDir)[0]
-    Write-Host $companyFolder.Name
+    Write-Host $companyFolder.Name -ForegroundColor Blue
     cd $($companyFolder.Name)
     $allGitDirs = @(Get-ChildItem -Directory)
     foreach($allGitDir in @($allGitDirs))
